@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unsur.Tulung — Jasa Serabutan Mahasiswa</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF6EC;
+    --paper-dim:#F1ECDD;
+    --ink:#1C2238;
+    --ink-soft:#4B5170;
+    --yellow:#FFC83D;
+    --coral:#FF6452;
+    --green:#3C9B6E;
+  }
+  *{ -webkit-tap-highlight-color: transparent; }
+  body{
+    font-family:'Inter',sans-serif;
+    background-color:var(--paper);
+    color:var(--ink);
+  }
+  .font-display{ font-family:'Space Grotesk',sans-serif; }
+  .font-mono{ font-family:'JetBrains Mono',monospace; }
+
+  .grid-paper{
+    background-image:
+      linear-gradient(rgba(28,34,56,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(28,34,56,0.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  .receipt{
+    background: #FFFEF8;
+    border: 1.5px solid var(--ink);
+    box-shadow: 6px 6px 0 var(--ink);
+    position: relative;
+  }
+  .receipt-zigzag{
+    height: 14px;
+    background-image:
+      linear-gradient(135deg, #FFFEF8 50%, transparent 50%),
+      linear-gradient(45deg, #FFFEF8 50%, transparent 50%);
+    background-size: 14px 14px;
+    background-position: top left;
+    background-color: var(--paper);
+  }
+  .dashed{
+    border-top: 1.5px dashed rgba(28,34,56,0.35);
+  }
+
+  .sticky-note{
+    box-shadow: 3px 5px 0 rgba(28,34,56,0.15);
+  }
+
+  .btn-press{ transition: transform .12s ease, box-shadow .12s ease; }
+  .btn-press:active{ transform: translate(2px,2px); }
+
+  .underline-squiggle{
+    text-decoration: underline;
+    text-decoration-style: wavy;
+    text-decoration-color: var(--coral);
+    text-underline-offset: 4px;
+  }
+
+  [x-cloak]{ display:none !important; }
+
+  ::selection{ background: var(--yellow); color: var(--ink); }
+
+  @media (prefers-reduced-motion: no-preference){
+    .hover-lift{ transition: transform .2s ease, box-shadow .2s ease; }
+    .hover-lift:hover{ transform: translateY(-3px); }
+  }
+</style>
+</head>
+<body class="antialiased" x-data="{ mobileNav:false }">
+
+<!-- ============ NAVBAR ============ -->
+<header class="sticky top-0 z-50 bg-[var(--paper)]/90 backdrop-blur border-b border-[var(--ink)]/10">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+    <a href="#top" class="font-display font-bold text-lg sm:text-xl flex items-center gap-2">
+      <span class="inline-flex w-8 h-8 rounded-md bg-[var(--ink)] text-[var(--yellow)] items-center justify-center font-mono text-sm">UT</span>
+      Unsur.Tulung
+    </a>
+    <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-[var(--ink-soft)]">
+      <a href="#layanan" class="hover:text-[var(--ink)]">Layanan</a>
+      <a href="#cara-kerja" class="hover:text-[var(--ink)]">Cara Kerja</a>
+      <a href="#harga" class="hover:text-[var(--ink)]">Estimasi Harga</a>
+      <a href="#testimoni" class="hover:text-[var(--ink)]">Testimoni</a>
+      <a href="#faq" class="hover:text-[var(--ink)]">FAQ</a>
+    </nav>
+    <a href="#pesan" class="hidden sm:inline-flex btn-press items-center gap-2 bg-[var(--ink)] text-[var(--paper)] font-display font-semibold text-sm px-4 py-2 rounded-md shadow-[3px_3px_0_var(--coral)] hover:shadow-[1px_1px_0_var(--coral)]">
+      Pesan Sekarang
+    </a>
+    <button @click="mobileNav = !mobileNav" class="md:hidden p-2 -mr-2" aria-label="Buka menu">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+    </button>
+  </div>
+  <div x-cloak x-show="mobileNav" x-transition class="md:hidden border-t border-[var(--ink)]/10 px-5 py-4 flex flex-col gap-3 text-sm font-medium bg-[var(--paper)]">
+    <a @click="mobileNav=false" href="#layanan">Layanan</a>
+    <a @click="mobileNav=false" href="#cara-kerja">Cara Kerja</a>
+    <a @click="mobileNav=false" href="#harga">Estimasi Harga</a>
+    <a @click="mobileNav=false" href="#testimoni">Testimoni</a>
+    <a @click="mobileNav=false" href="#faq">FAQ</a>
+    <a @click="mobileNav=false" href="#pesan" class="mt-1 text-center bg-[var(--ink)] text-[var(--paper)] font-display font-semibold px-4 py-2 rounded-md">Pesan Sekarang</a>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section id="top" class="grid-paper relative overflow-hidden">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8 py-14 sm:py-20 grid lg:grid-cols-[1.1fr_0.9fr] gap-12 items-center">
+    <div>
+      <span class="inline-block font-mono text-xs uppercase tracking-wider bg-[var(--yellow)] text-[var(--ink)] px-3 py-1 rounded-full border border-[var(--ink)]/20">
+        Buka tiap hari · 07.00–22.00
+      </span>
+      <h1 class="font-display font-bold text-4xl sm:text-5xl lg:text-[3.3rem] leading-[1.08] mt-5">
+        Repot ngurus hal kecil?
+        <span class="underline-squiggle">Unsur.Tulung</span> yang turun tangan.
+      </h1>
+      <p class="text-[var(--ink-soft)] text-base sm:text-lg mt-5 max-w-md">
+        Jasa serabutan dari mahasiswa untuk siapa saja di sekitar kampus. Titip beli, jemput barang, antar dokumen, sampai kerjaan rumah kecil-kecil — tinggal pesan, kami yang jalan.
+      </p>
+      <div class="flex flex-wrap gap-3 mt-7">
+        <a href="#pesan" class="btn-press inline-flex items-center gap-2 bg-[var(--ink)] text-[var(--paper)] font-display font-semibold px-5 py-3 rounded-md shadow-[4px_4px_0_var(--coral)] hover:shadow-[2px_2px_0_var(--coral)]">
+          Buat Pesanan
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+        </a>
+        <a href="#layanan" class="btn-press inline-flex items-center gap-2 bg-transparent border-2 border-[var(--ink)] font-display font-semibold px-5 py-3 rounded-md hover:bg-[var(--ink)] hover:text-[var(--paper)]">
+          Lihat Layanan
+        </a>
+      </div>
+      <div class="flex items-center gap-6 mt-8 text-sm text-[var(--ink-soft)]">
+        <div><span class="font-display font-bold text-[var(--ink)] text-xl">4.9/5</span><br>rating order</div>
+        <div class="w-px h-9 bg-[var(--ink)]/15"></div>
+        <div><span class="font-display font-bold text-[var(--ink)] text-xl">±20 min</span><br>respon chat</div>
+        <div class="w-px h-9 bg-[var(--ink)]/15"></div>
+        <div><span class="font-display font-bold text-[var(--ink)] text-xl">100%</span><br>mahasiswa aktif</div>
+      </div>
+    </div>
+
+    <!-- Receipt mockup -->
+    <div class="relative max-w-sm mx-auto w-full" aria-hidden="true">
+      <div class="receipt rounded-sm p-6 font-mono text-sm rotate-1">
+        <p class="font-display font-bold text-base text-center tracking-wide">★ UNSUR.TULUNG ★</p>
+        <p class="text-center text-xs text-[var(--ink-soft)] mb-3">Struk Pesanan</p>
+        <div class="dashed pt-3 space-y-1.5 text-[var(--ink-soft)]">
+          <div class="flex justify-between"><span>1x Titip beli galon</span><span class="text-[var(--ink)]">Rp10.000</span></div>
+          <div class="flex justify-between"><span>1x Antar dokumen ke kos</span><span class="text-[var(--ink)]">Rp8.000</span></div>
+          <div class="flex justify-between"><span>1x Jemput paket JNE</span><span class="text-[var(--ink)]">Rp7.000</span></div>
+        </div>
+        <div class="dashed mt-3 pt-3 flex justify-between font-display font-bold">
+          <span>TOTAL</span><span>Rp25.000</span>
+        </div>
+        <p class="text-center text-xs text-[var(--ink-soft)] mt-3">Status: <span class="text-[var(--green)] font-semibold">sedang dikerjain ✓</span></p>
+      </div>
+      <div class="receipt-zigzag rounded-b-sm -mt-px"></div>
+      <div class="absolute -right-4 -top-4 sm:-right-8 sm:-top-6 sticky-note bg-[var(--yellow)] border border-[var(--ink)]/20 rounded-sm px-3 py-2 -rotate-6 font-display text-xs font-semibold">
+        gercep!
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LAYANAN ============ -->
+<section id="layanan" class="max-w-6xl mx-auto px-5 sm:px-8 py-16 sm:py-20">
+  <div class="max-w-xl">
+    <span class="font-mono text-xs uppercase tracking-wider text-[var(--coral)]">Apa aja bisa</span>
+    <h2 class="font-display font-bold text-3xl sm:text-4xl mt-2">Layanan yang sering dipesan</h2>
+    <p class="text-[var(--ink-soft)] mt-3">Daftar di bawah cuma contoh — kalau kerjaanmu nggak ada di sini, tulis saja di form pesanan, kami pertimbangkan.</p>
+  </div>
+
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-10">
+    <template x-for="(item, i) in [
+      {icon:'🛵', title:'Jemput &amp; Antar Barang', desc:'Ambil paket, antar dokumen, kirim barang ke kos atau kampus.'},
+      {icon:'🛒', title:'Titip Beli', desc:'Belanja kebutuhan harian, jajan, atau barang dari toko tertentu.'},
+      {icon:'🖨️', title:'Print &amp; Jilid Tugas', desc:'Cetak, print warna, jilid, sampai fotokopi berkas kuliah.'},
+      {icon:'🧹', title:'Bersih-bersih Kos', desc:'Bantu rapikan kamar, cuci piring, atau beres-beres ringan.'},
+      {icon:'📝', title:'Bantuan Administrasi', desc:'Antar berkas ke fakultas, urus tanda tangan, daftar ulang, dll.'},
+      {icon:'✨', title:'Permintaan Lain', desc:'Ada kerjaan kecil lain? Tulis di form, kami kabari bisa atau tidak.'}
+    ]" :key="i">
+      <div class="hover-lift bg-[var(--paper-dim)] border border-[var(--ink)]/10 rounded-lg p-5">
+        <span class="text-2xl" x-text="item.icon"></span>
+        <h3 class="font-display font-semibold text-lg mt-3" x-html="item.title"></h3>
+        <p class="text-sm text-[var(--ink-soft)] mt-1.5" x-html="item.desc"></p>
+      </div>
+    </template>
+  </div>
+</section>
+
+<!-- ============ CARA KERJA ============ -->
+<section id="cara-kerja" class="bg-[var(--ink)] text-[var(--paper)] py-16 sm:py-20">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8">
+    <span class="font-mono text-xs uppercase tracking-wider text-[var(--yellow)]">Urutannya gini</span>
+    <h2 class="font-display font-bold text-3xl sm:text-4xl mt-2">Cara kerja, 4 langkah saja</h2>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
+      <template x-for="(step, i) in [
+        {n:'01', title:'Isi form pesanan', desc:'Pilih jenis bantuan, ceritakan detailnya, kasih lokasi.'},
+        {n:'02', title:'Kirim ke WhatsApp', desc:'Klik tombol kirim, pesanan otomatis tersusun jadi chat.'},
+        {n:'03', title:'Kami konfirmasi', desc:'Dapat info estimasi waktu dan biaya sebelum dikerjakan.'},
+        {n:'04', title:'Beres, tinggal bayar', desc:'Bayar tunai atau transfer setelah pekerjaan selesai.'}
+      ]" :key="i">
+        <div>
+          <p class="font-mono text-[var(--coral)] text-sm" x-text="step.n"></p>
+          <h3 class="font-display font-semibold text-lg mt-2" x-text="step.title"></h3>
+          <p class="text-sm text-[var(--paper)]/70 mt-1.5" x-text="step.desc"></p>
+        </div>
+      </template>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HARGA ============ -->
+<section id="harga" class="max-w-6xl mx-auto px-5 sm:px-8 py-16 sm:py-20">
+  <div class="max-w-xl">
+    <span class="font-mono text-xs uppercase tracking-wider text-[var(--coral)]">Transparan</span>
+    <h2 class="font-display font-bold text-3xl sm:text-4xl mt-2">Estimasi harga</h2>
+    <p class="text-[var(--ink-soft)] mt-3">Harga di bawah hanya kisaran. Biaya pasti dikonfirmasi dulu lewat chat sebelum kami mulai kerjakan, jadi tidak ada kejutan.</p>
+  </div>
+
+  <div class="receipt rounded-sm max-w-lg mt-10 p-6 sm:p-8 font-mono text-sm">
+    <p class="font-display font-bold text-base text-center tracking-wide">DAFTAR HARGA</p>
+    <div class="dashed mt-3 pt-3 space-y-3">
+      <template x-for="(row, i) in [
+        ['Titip beli (sekitar kampus)', 'mulai Rp8.000'],
+        ['Jemput / antar barang', 'mulai Rp7.000'],
+        ['Print & jilid (per dokumen)', 'mulai Rp3.000'],
+        ['Bersih-bersih kos (per jam)', 'mulai Rp20.000'],
+        ['Bantuan administrasi', 'mulai Rp10.000'],
+        ['Permintaan custom', 'nego di chat']
+      ]" :key="i">
+        <div class="flex justify-between text-[var(--ink-soft)]">
+          <span x-text="row[0]"></span>
+          <span class="text-[var(--ink)]" x-text="row[1]"></span>
+        </div>
+      </template>
+    </div>
+    <p class="dashed mt-4 pt-3 text-xs text-[var(--ink-soft)] text-center">*belum termasuk biaya barang yang dititip</p>
+  </div>
+</section>
+
+<!-- ============ FORM PESAN (signature interaktif) ============ -->
+<section id="pesan" class="grid-paper py-16 sm:py-20">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8">
+    <div class="max-w-xl mx-auto text-center">
+      <span class="font-mono text-xs uppercase tracking-wider text-[var(--coral)]">Tinggal isi</span>
+      <h2 class="font-display font-bold text-3xl sm:text-4xl mt-2">Buat pesananmu</h2>
+      <p class="text-[var(--ink-soft)] mt-3">Isi form ini, struknya muncul otomatis di sebelah, lalu kirim langsung ke WhatsApp kami.</p>
+    </div>
+
+    <div x-data="{
+      nama:'',
+      layanan:'Titip Beli',
+      lokasiTujuan:'',
+      detail:'',
+      waktu:'',
+      nomorWA:'6285199274599',
+      get pesan(){
+        return `Halo Unsur.Tulung, saya mau pesan:
+Nama: ${this.nama || '-'}
+Layanan: ${this.layanan}
+Lokasi jemput: (lihat share location yang saya kirim setelah ini)
+Lokasi tujuan: ${this.lokasiTujuan || '-'}
+Waktu dibutuhkan: ${this.waktu || 'secepatnya'}
+Detail: ${this.detail || '-'}`;
+      },
+      get waLink(){
+        return 'https://wa.me/' + this.nomorWA + '?text=' + encodeURIComponent(this.pesan);
+      },
+      get siapKirim(){
+        return this.nama.trim() !== '' && this.detail.trim() !== '';
+      }
+    }" class="grid lg:grid-cols-[1fr_0.85fr] gap-8 mt-10 items-start">
+
+      <!-- form -->
+      <form @submit.prevent class="bg-[var(--paper-dim)] border border-[var(--ink)]/10 rounded-lg p-6 sm:p-7 space-y-5">
+        <div>
+          <label class="block text-sm font-semibold mb-1.5">Nama kamu</label>
+          <input x-model="nama" type="text" placeholder="cth. Dimas" class="w-full rounded-md border border-[var(--ink)]/20 bg-[var(--paper)] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--coral)]">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold mb-1.5">Jenis layanan</label>
+          <select x-model="layanan" class="w-full rounded-md border border-[var(--ink)]/20 bg-[var(--paper)] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--coral)]">
+            <option>Titip Beli</option>
+            <option>Jemput & Antar Barang</option>
+            <option>Print & Jilid Tugas</option>
+            <option>Bersih-bersih Kos</option>
+            <option>Bantuan Administrasi</option>
+            <option>Permintaan Lain</option>
+          </select>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="rounded-md border border-dashed border-[var(--coral)]/50 bg-[var(--coral)]/5 px-3 py-2.5">
+            <p class="text-sm font-semibold flex items-center gap-1.5">📍 Lokasi jemput</p>
+            <p class="text-xs text-[var(--ink-soft)] mt-1">Tidak perlu diketik. Setelah chat WhatsApp terbuka, kirim lewat fitur <span class="font-semibold">Share Location</span> (ikon 📎 → Lokasi).</p>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1.5">Lokasi tujuan</label>
+            <input x-model="lokasiTujuan" type="text" placeholder="cth. Kos Melati No. 4" class="w-full rounded-md border border-[var(--ink)]/20 bg-[var(--paper)] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--coral)]">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold mb-1.5">Waktu dibutuhkan</label>
+          <input x-model="waktu" type="text" placeholder="cth. hari ini sore" class="w-full rounded-md border border-[var(--ink)]/20 bg-[var(--paper)] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--coral)]">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold mb-1.5">Detail pesanan</label>
+          <textarea x-model="detail" rows="3" placeholder="Ceritakan apa yang perlu dibantu, sedetail mungkin" class="w-full rounded-md border border-[var(--ink)]/20 bg-[var(--paper)] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--coral)]"></textarea>
+        </div>
+
+        <a :href="siapKirim ? waLink : '#'"
+           target="_blank"
+           :class="siapKirim ? 'bg-[var(--ink)] text-[var(--paper)] shadow-[4px_4px_0_var(--coral)] hover:shadow-[2px_2px_0_var(--coral)]' : 'bg-[var(--ink)]/30 text-[var(--paper)] cursor-not-allowed'"
+           @click="if(!siapKirim) $event.preventDefault()"
+           class="btn-press w-full inline-flex justify-center items-center gap-2 font-display font-semibold px-5 py-3 rounded-md">
+          Kirim Pesanan via WhatsApp
+        </a>
+        <p x-show="!siapKirim" x-cloak class="text-xs text-[var(--ink-soft)] text-center">Isi minimal nama dan detail pesanan dulu, ya.</p>
+      </form>
+
+      <!-- live receipt -->
+      <div class="lg:sticky lg:top-24">
+        <div class="receipt rounded-sm p-6 font-mono text-sm">
+          <p class="font-display font-bold text-base text-center tracking-wide">★ UNSUR.TULUNG ★</p>
+          <p class="text-center text-xs text-[var(--ink-soft)] mb-3">Pratinjau Struk Pesanan</p>
+          <div class="dashed pt-3 space-y-1.5 text-[var(--ink-soft)]">
+            <div class="flex justify-between gap-3"><span>Nama</span><span class="text-[var(--ink)] text-right" x-text="nama || '—'"></span></div>
+            <div class="flex justify-between gap-3"><span>Layanan</span><span class="text-[var(--ink)] text-right" x-text="layanan"></span></div>
+            <div class="flex justify-between gap-3"><span>Tujuan</span><span class="text-[var(--ink)] text-right" x-text="lokasiTujuan || '—'"></span></div>
+            <div class="flex justify-between gap-3"><span>Waktu</span><span class="text-[var(--ink)] text-right" x-text="waktu || 'secepatnya'"></span></div>
+          </div>
+          <div class="dashed mt-3 pt-3 text-xs text-[var(--coral)] font-semibold text-center">
+            📍 Jangan lupa share location jemput via WhatsApp
+          </div>
+          <div class="dashed mt-3 pt-3">
+            <p class="text-[var(--ink-soft)] mb-1">Detail:</p>
+            <p class="text-[var(--ink)]" x-text="detail || 'belum diisi...'"></p>
+          </div>
+          <p class="text-center text-xs text-[var(--ink-soft)] mt-3">Status: <span class="font-semibold" x-text="siapKirim ? 'siap dikirim ✓' : 'menunggu data...'"></span></p>
+        </div>
+        <div class="receipt-zigzag rounded-b-sm -mt-px"></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ TESTIMONI ============ -->
+<section id="testimoni" class="max-w-6xl mx-auto px-5 sm:px-8 py-16 sm:py-20">
+  <div class="max-w-xl">
+    <span class="font-mono text-xs uppercase tracking-wider text-[var(--coral)]">Kata mereka</span>
+    <h2 class="font-display font-bold text-3xl sm:text-4xl mt-2">Yang sudah pernah pesan</h2>
+  </div>
+
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+    <template x-for="(t, i) in [
+      {q:'Lagi sakit dan butuh obat, dianter kurang dari 30 menit. Beneran nolong banget.', n:'— Sarah, Sastra Inggris', rot:'-rotate-2'},
+      {q:'Sering titip print tugas pagi-pagi, langsung sampai sebelum kelas mulai. Praktis.', n:'— Bagas, Teknik Sipil', rot:'rotate-1'},
+      {q:'Kos lagi berantakan pas UAS, mereka bantu bersih-bersih sambil aku belajar di perpus.', n:'— Nadia, Manajemen', rot:'-rotate-1'}
+    ]" :key="i">
+      <div class="sticky-note bg-[var(--yellow)] border border-[var(--ink)]/15 rounded-sm p-5" :class="t.rot">
+        <p class="text-sm text-[var(--ink)]" x-text="'\u201C' + t.q + '\u201D'"></p>
+        <p class="font-display font-semibold text-sm mt-3" x-text="t.n"></p>
+      </div>
+    </template>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section id="faq" class="bg-[var(--paper-dim)] py-16 sm:py-20">
+  <div class="max-w-3xl mx-auto px-5 sm:px-8">
+    <span class="font-mono text-xs uppercase tracking-wider text-[var(--coral)]">Sering ditanya</span>
+    <h2 class="font-display font-bold text-3xl sm:text-4xl mt-2">FAQ</h2>
+
+    <div class="mt-8 divide-y divide-[var(--ink)]/10" x-data="{ open: null }">
+      <template x-for="(faq, i) in [
+        {q:'Apakah cuma untuk area sekitar kampus saja?', a:'Sebagian besar order memang di sekitar kampus dan kos-kosan terdekat, tapi untuk jarak lebih jauh tetap bisa, biaya disesuaikan dulu lewat chat.'},
+        {q:'Bagaimana cara bayarnya?', a:'Bisa tunai saat pekerjaan selesai atau transfer bank/e-wallet. Nominal disepakati dulu sebelum kami mulai kerjakan.'},
+        {q:'Kalau barang yang dititip rusak atau hilang, gimana?', a:'Kami akan ganti sesuai kesepakatan. Untuk barang bernilai besar, sebaiknya diinfokan dulu supaya bisa diatur penanganannya.'},
+        {q:'Bisa pesan untuk hari yang sama?', a:'Bisa, selama masih dalam jam operasional dan ada yang available. Semakin cepat pesan, semakin besar kemungkinan langsung dikerjakan.'},
+        {q:'Apakah harus jadi mahasiswa untuk pakai jasa ini?', a:'Tidak. Siapa saja di sekitar area layanan boleh pesan — yang mahasiswa itu yang mengerjakan, bukan yang harus memesan.'}
+      ]" :key="i">
+        <button @click="open = (open === i ? null : i)" class="w-full flex items-center justify-between gap-4 py-4 text-left font-display font-semibold">
+          <span x-text="faq.q"></span>
+          <span class="shrink-0 font-mono text-[var(--coral)]" x-text="open === i ? '–' : '+'"></span>
+        </button>
+        <div x-cloak x-show="open === i" x-collapse class="pb-4 text-sm text-[var(--ink-soft)]" x-text="faq.a"></div>
+      </template>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="bg-[var(--ink)] text-[var(--paper)] py-12">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    <div class="col-span-2 lg:col-span-1">
+      <p class="font-display font-bold text-lg flex items-center gap-2">
+        <span class="inline-flex w-7 h-7 rounded-md bg-[var(--yellow)] text-[var(--ink)] items-center justify-center font-mono text-xs">UT</span>
+        Unsur.Tulung
+      </p>
+      <p class="text-sm text-[var(--paper)]/60 mt-3">Jasa serabutan dari mahasiswa, untuk siapa saja di sekitar kampus.</p>
+    </div>
+    <div>
+      <p class="font-display font-semibold text-sm uppercase tracking-wider text-[var(--paper)]/50">Kontak</p>
+      <ul class="mt-3 space-y-2 text-sm text-[var(--paper)]/80">
+        <li>WhatsApp: 0851-9927-4599</li>
+        <li>Email: halo@unsurtulung.id</li>
+        <li>Jam: 07.00–22.00 setiap hari</li>
+      </ul>
+    </div>
+    <div>
+      <p class="font-display font-semibold text-sm uppercase tracking-wider text-[var(--paper)]/50">Navigasi</p>
+      <ul class="mt-3 space-y-2 text-sm text-[var(--paper)]/80">
+        <li><a href="#layanan" class="hover:text-[var(--yellow)]">Layanan</a></li>
+        <li><a href="#cara-kerja" class="hover:text-[var(--yellow)]">Cara Kerja</a></li>
+        <li><a href="#harga" class="hover:text-[var(--yellow)]">Estimasi Harga</a></li>
+        <li><a href="#pesan" class="hover:text-[var(--yellow)]">Pesan</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="font-display font-semibold text-sm uppercase tracking-wider text-[var(--paper)]/50">Area Layanan</p>
+      <p class="text-sm text-[var(--paper)]/80 mt-3">Sekitar kampus & kos terdekat. Area lain bisa dikonfirmasi via chat.</p>
+    </div>
+  </div>
+  <p class="text-center text-xs text-[var(--paper)]/40 mt-10">© 2026 Unsur.Tulung. Dikerjakan dengan niat dan kopi sachet.</p>
+</footer>
+
+</body>
+</html>

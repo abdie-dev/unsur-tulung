@@ -17,6 +17,7 @@
     --yellow:#FFC83D;
     --coral:#FF6452;
     --green:#3C9B6E;
+    --blue:#4A7CF7;
   }
   *{ -webkit-tap-highlight-color: transparent; }
   body{
@@ -75,9 +76,101 @@
     .hover-lift{ transition: transform .2s ease, box-shadow .2s ease; }
     .hover-lift:hover{ transform: translateY(-3px); }
   }
+
+  /* Progress bar animation */
+  .progress-fill {
+    animation: progressAnim 1.5s ease-in-out infinite alternate;
+  }
+  @keyframes progressAnim {
+    0% { width: 10%; }
+    100% { width: 90%; }
+  }
+
+  .pulse-dot {
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
 </style>
 </head>
-<body class="antialiased" x-data="{ mobileNav:false }">
+<body class="antialiased" x-data="{ 
+  mobileNav: false,
+  // Form data
+  nama: '',
+  layanan: 'Titip Beli',
+  lokasiTujuan: '',
+  detail: '',
+  waktu: '',
+  jarak: 1,
+  // Order tracking
+  orderStatus: null,
+  orderStep: 0,
+  // Price calculation
+  get basePrice() {
+    const prices = {
+      'Titip Beli': 10000,
+      'Jemput & Antar Barang': 8000,
+      'Print & Jilid Tugas': 3000,
+      'Bersih-bersih Kos': 25000,
+      'Bantuan Administrasi': 12000,
+      'Permintaan Lain': 0
+    };
+    return prices[this.layanan] || 0;
+  },
+  get distanceCost() {
+    if (this.layanan === 'Print & Jilid Tugas' || this.layanan === 'Permintaan Lain') return 0;
+    const extraKm = Math.max(0, this.jarak - 1);
+    return extraKm * 2000;
+  },
+  get weightCost() {
+    return 0; // Will be added if weight > 5kg, simplified
+  },
+  get rushCost() {
+    return 0; // Could be toggled by user
+  },
+  get totalPrice() {
+    return this.basePrice + this.distanceCost + this.weightCost + this.rushCost;
+  },
+  get formattedPrice() {
+    return 'Rp' + this.totalPrice.toLocaleString('id-ID');
+  },
+  // WhatsApp
+  nomorWA: '6285199274599',
+  get pesan() {
+    return `Halo Unsur.Tulung! Saya mau pesan:
+
+📋 Nama: ${this.nama || '-'}
+📌 Layanan: ${this.layanan}
+📍 Lokasi Jemput: (akan saya share via lokasi WA)
+📍 Lokasi Tujuan: ${this.lokasiTujuan || '-'}
+📏 Perkiraan Jarak: ${this.jarak} km
+⏰ Waktu Dibutuhkan: ${this.waktu || 'secepatnya'}
+📝 Detail Pesanan:
+${this.detail || '-'}
+
+Estimasi biaya: ${this.formattedPrice}`;
+  },
+  get waLink() {
+    return 'https://wa.me/' + this.nomorWA + '?text=' + encodeURIComponent(this.pesan);
+  },
+  get siapKirim() {
+    return this.nama.trim() !== '' && this.detail.trim() !== '';
+  },
+  // Simulasi tracking
+  startTracking() {
+    this.orderStatus = 'diproses';
+    this.orderStep = 1;
+    setTimeout(() => { this.orderStep = 2; this.orderStatus = 'dijemput'; }, 3000);
+    setTimeout(() => { this.orderStep = 3; this.orderStatus = 'dikerjakan'; }, 6000);
+    setTimeout(() => { this.orderStep = 4; this.orderStatus = 'selesai'; }, 9000);
+  },
+  resetTracking() {
+    this.orderStatus = null;
+    this.orderStep = 0;
+  }
+}">
 
 <!-- ============ NAVBAR ============ -->
 <header class="sticky top-0 z-50 bg-[var(--paper)]/90 backdrop-blur border-b border-[var(--ink)]/10">
@@ -88,10 +181,11 @@
     </a>
     <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-[var(--ink-soft)]">
       <a href="#layanan" class="hover:text-[var(--ink)]">Layanan</a>
-      <a href="#cara-kerja" class="hover:text-[var(--ink)]">Cara Kerja</a>
-      <a href="#harga" class="hover:text-[var(--ink)]">Estimasi Harga</a>
+      <a href="#harga" class="hover:text-[var(--ink)]">Harga</a>
+      <a href="#sistem" class="hover:text-[var(--ink)]">Sistem</a>
       <a href="#testimoni" class="hover:text-[var(--ink)]">Testimoni</a>
       <a href="#faq" class="hover:text-[var(--ink)]">FAQ</a>
+      <a href="#pesan" class="hover:text-[var(--ink)]">Pesan</a>
     </nav>
     <a href="#pesan" class="hidden sm:inline-flex btn-press items-center gap-2 bg-[var(--ink)] text-[var(--paper)] font-display font-semibold text-sm px-4 py-2 rounded-md shadow-[3px_3px_0_var(--coral)] hover:shadow-[1px_1px_0_var(--coral)]">
       Pesan Sekarang
@@ -102,8 +196,8 @@
   </div>
   <div x-cloak x-show="mobileNav" x-transition class="md:hidden border-t border-[var(--ink)]/10 px-5 py-4 flex flex-col gap-3 text-sm font-medium bg-[var(--paper)]">
     <a @click="mobileNav=false" href="#layanan">Layanan</a>
-    <a @click="mobileNav=false" href="#cara-kerja">Cara Kerja</a>
-    <a @click="mobileNav=false" href="#harga">Estimasi Harga</a>
+    <a @click="mobileNav=false" href="#harga">Harga</a>
+    <a @click="mobileNav=false" href="#sistem">Sistem</a>
     <a @click="mobileNav=false" href="#testimoni">Testimoni</a>
     <a @click="mobileNav=false" href="#faq">FAQ</a>
     <a @click="mobileNav=false" href="#pesan" class="mt-1 text-center bg-[var(--ink)] text-[var(--paper)] font-display font-semibold px-4 py-2 rounded-md">Pesan Sekarang</a>
@@ -115,7 +209,7 @@
   <div class="max-w-6xl mx-auto px-5 sm:px-8 py-14 sm:py-20 grid lg:grid-cols-[1.1fr_0.9fr] gap-12 items-center">
     <div>
       <span class="inline-block font-mono text-xs uppercase tracking-wider bg-[var(--yellow)] text-[var(--ink)] px-3 py-1 rounded-full border border-[var(--ink)]/20">
-        Buka tiap hari · 07.00–22.00
+        🚀 Buka tiap hari · 07.00–22.00
       </span>
       <h1 class="font-display font-bold text-4xl sm:text-5xl lg:text-[3.3rem] leading-[1.08] mt-5">
         Repot ngurus hal kecil?
@@ -129,8 +223,8 @@
           Buat Pesanan
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
         </a>
-        <a href="#layanan" class="btn-press inline-flex items-center gap-2 bg-transparent border-2 border-[var(--ink)] font-display font-semibold px-5 py-3 rounded-md hover:bg-[var(--ink)] hover:text-[var(--paper)]">
-          Lihat Layanan
+        <a href="#harga" class="btn-press inline-flex items-center gap-2 bg-transparent border-2 border-[var(--ink)] font-display font-semibold px-5 py-3 rounded-md hover:bg-[var(--ink)] hover:text-[var(--paper)]">
+          Lihat Harga
         </a>
       </div>
       <div class="flex items-center gap-6 mt-8 text-sm text-[var(--ink-soft)]">
@@ -175,75 +269,158 @@
 
   <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-10">
     <template x-for="(item, i) in [
-      {icon:'🛵', title:'Jemput &amp; Antar Barang', desc:'Ambil paket, antar dokumen, kirim barang ke kos atau kampus.'},
-      {icon:'🛒', title:'Titip Beli', desc:'Belanja kebutuhan harian, jajan, atau barang dari toko tertentu.'},
-      {icon:'🖨️', title:'Print &amp; Jilid Tugas', desc:'Cetak, print warna, jilid, sampai fotokopi berkas kuliah.'},
-      {icon:'🧹', title:'Bersih-bersih Kos', desc:'Bantu rapikan kamar, cuci piring, atau beres-beres ringan.'},
-      {icon:'📝', title:'Bantuan Administrasi', desc:'Antar berkas ke fakultas, urus tanda tangan, daftar ulang, dll.'},
-      {icon:'✨', title:'Permintaan Lain', desc:'Ada kerjaan kecil lain? Tulis di form, kami kabari bisa atau tidak.'}
+      {icon:'🛵', title:'Jemput &amp; Antar Barang', desc:'Ambil paket, antar dokumen, kirim barang ke kos atau kampus.', price:'mulai Rp8.000'},
+      {icon:'🛒', title:'Titip Beli', desc:'Belanja kebutuhan harian, jajan, atau barang dari toko tertentu.', price:'mulai Rp10.000'},
+      {icon:'🖨️', title:'Print &amp; Jilid Tugas', desc:'Cetak, print warna, jilid, sampai fotokopi berkas kuliah.', price:'mulai Rp3.000'},
+      {icon:'🧹', title:'Bersih-bersih Kos', desc:'Bantu rapikan kamar, cuci piring, atau beres-beres ringan.', price:'mulai Rp25.000/jam'},
+      {icon:'📝', title:'Bantuan Administrasi', desc:'Antar berkas ke fakultas, urus tanda tangan, daftar ulang, dll.', price:'mulai Rp12.000'},
+      {icon:'✨', title:'Permintaan Lain', desc:'Ada kerjaan kecil lain? Tulis di form, kami kabari bisa atau tidak.', price:'nego di chat'}
     ]" :key="i">
       <div class="hover-lift bg-[var(--paper-dim)] border border-[var(--ink)]/10 rounded-lg p-5">
         <span class="text-2xl" x-text="item.icon"></span>
         <h3 class="font-display font-semibold text-lg mt-3" x-html="item.title"></h3>
         <p class="text-sm text-[var(--ink-soft)] mt-1.5" x-html="item.desc"></p>
+        <p class="text-sm font-display font-semibold text-[var(--coral)] mt-2" x-text="item.price"></p>
       </div>
     </template>
   </div>
 </section>
 
-<!-- ============ CARA KERJA ============ -->
-<section id="cara-kerja" class="bg-[var(--ink)] text-[var(--paper)] py-16 sm:py-20">
+<!-- ============ HARGA (new & improved) ============ -->
+<section id="harga" class="bg-[var(--paper-dim)] py-16 sm:py-20">
   <div class="max-w-6xl mx-auto px-5 sm:px-8">
-    <span class="font-mono text-xs uppercase tracking-wider text-[var(--yellow)]">Urutannya gini</span>
-    <h2 class="font-display font-bold text-3xl sm:text-4xl mt-2">Cara kerja, 4 langkah saja</h2>
+    <div class="max-w-xl">
+      <span class="font-mono text-xs uppercase tracking-wider text-[var(--coral)]">Transparan</span>
+      <h2 class="font-display font-bold text-3xl sm:text-4xl mt-2">Struktur Harga</h2>
+      <p class="text-[var(--ink-soft)] mt-3">Harga di bawah adalah patokan internal. Biaya final selalu dikonfirmasi lewat chat sebelum dikerjakan — tidak ada kejutan!</p>
+    </div>
 
-    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
-      <template x-for="(step, i) in [
-        {n:'01', title:'Isi form pesanan', desc:'Pilih jenis bantuan, ceritakan detailnya, kasih lokasi.'},
-        {n:'02', title:'Kirim ke WhatsApp', desc:'Klik tombol kirim, pesanan otomatis tersusun jadi chat.'},
-        {n:'03', title:'Kami konfirmasi', desc:'Dapat info estimasi waktu dan biaya sebelum dikerjakan.'},
-        {n:'04', title:'Beres, tinggal bayar', desc:'Bayar tunai atau transfer setelah pekerjaan selesai.'}
-      ]" :key="i">
-        <div>
-          <p class="font-mono text-[var(--coral)] text-sm" x-text="step.n"></p>
-          <h3 class="font-display font-semibold text-lg mt-2" x-text="step.title"></h3>
-          <p class="text-sm text-[var(--paper)]/70 mt-1.5" x-text="step.desc"></p>
+    <!-- Price Table -->
+    <div class="mt-8 grid md:grid-cols-2 gap-6">
+      <!-- Base Prices -->
+      <div class="receipt rounded-sm p-6 font-mono text-sm">
+        <p class="font-display font-bold text-base text-center tracking-wide">💰 HARGA DASAR</p>
+        <div class="dashed mt-3 pt-3 space-y-3">
+          <div class="flex justify-between"><span>Titip Beli</span><span class="font-semibold">Rp10.000</span></div>
+          <div class="flex justify-between"><span>Jemput & Antar</span><span class="font-semibold">Rp8.000</span></div>
+          <div class="flex justify-between"><span>Print & Jilid</span><span class="font-semibold">Rp3.000/dokumen</span></div>
+          <div class="flex justify-between"><span>Bersih-bersih</span><span class="font-semibold">Rp25.000/jam</span></div>
+          <div class="flex justify-between"><span>Administrasi</span><span class="font-semibold">Rp12.000</span></div>
+          <div class="flex justify-between"><span>Custom</span><span class="font-semibold">Nego</span></div>
         </div>
-      </template>
+        <p class="text-center text-xs text-[var(--ink-soft)] mt-3">*Harga dasar untuk jarak ≤1 km</p>
+      </div>
+
+      <!-- Additional Fees -->
+      <div class="receipt rounded-sm p-6 font-mono text-sm">
+        <p class="font-display font-bold text-base text-center tracking-wide">📋 BIAYA TAMBAHAN</p>
+        <div class="dashed mt-3 pt-3 space-y-3">
+          <div class="flex justify-between"><span>Jarak tambahan (&gt;1km)</span><span class="font-semibold">+Rp2.000/km</span></div>
+          <div class="flex justify-between"><span>Barang berat (&gt;5kg)</span><span class="font-semibold">+Rp3.000</span></div>
+          <div class="flex justify-between"><span>Order dadakan (&lt;1 jam)</span><span class="font-semibold">+Rp5.000</span></div>
+          <div class="flex justify-between"><span>Menunggu &gt;15 menit</span><span class="font-semibold">+Rp2.000/15m</span></div>
+          <div class="flex justify-between"><span>Transfer (biaya admin)</span><span class="font-semibold">customer</span></div>
+        </div>
+        <p class="text-center text-xs text-[var(--ink-soft)] mt-3">*Semua biaya tambahan dikonfirmasi sebelum order</p>
+      </div>
+    </div>
+
+    <!-- Contoh Perhitungan -->
+    <div class="mt-8 bg-[var(--ink)] text-[var(--paper)] rounded-lg p-6 max-w-2xl">
+      <p class="font-display font-semibold text-sm uppercase tracking-wider text-[var(--yellow)]">📌 Contoh Perhitungan</p>
+      <p class="mt-2 text-sm">Titip Beli di warung <strong>2,5 km</strong> dari posisi:</p>
+      <div class="mt-3 font-mono text-sm space-y-1">
+        <div class="flex justify-between"><span>Harga dasar</span><span>Rp10.000</span></div>
+        <div class="flex justify-between"><span>Jarak (2,5 - 1) × Rp2.000</span><span>+ Rp3.000</span></div>
+        <div class="dashed pt-2 flex justify-between font-display font-bold text-[var(--yellow)]"><span>TOTAL</span><span>Rp13.000</span></div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ============ HARGA ============ -->
-<section id="harga" class="max-w-6xl mx-auto px-5 sm:px-8 py-16 sm:py-20">
+<!-- ============ SISTEM OPERASIONAL (new section) ============ -->
+<section id="sistem" class="max-w-6xl mx-auto px-5 sm:px-8 py-16 sm:py-20">
   <div class="max-w-xl">
-    <span class="font-mono text-xs uppercase tracking-wider text-[var(--coral)]">Transparan</span>
-    <h2 class="font-display font-bold text-3xl sm:text-4xl mt-2">Estimasi harga</h2>
-    <p class="text-[var(--ink-soft)] mt-3">Harga di bawah hanya kisaran. Biaya pasti dikonfirmasi dulu lewat chat sebelum kami mulai kerjakan, jadi tidak ada kejutan.</p>
+    <span class="font-mono text-xs uppercase tracking-wider text-[var(--coral)]">Cara kerja</span>
+    <h2 class="font-display font-bold text-3xl sm:text-4xl mt-2">Sistem Operasional</h2>
+    <p class="text-[var(--ink-soft)] mt-3">Dari order sampai selesai, semua terstruktur biar nggak ribet.</p>
   </div>
 
-  <div class="receipt rounded-sm max-w-lg mt-10 p-6 sm:p-8 font-mono text-sm">
-    <p class="font-display font-bold text-base text-center tracking-wide">DAFTAR HARGA</p>
-    <div class="dashed mt-3 pt-3 space-y-3">
-      <template x-for="(row, i) in [
-        ['Titip beli (sekitar kampus)', 'mulai Rp8.000'],
-        ['Jemput / antar barang', 'mulai Rp7.000'],
-        ['Print & jilid (per dokumen)', 'mulai Rp3.000'],
-        ['Bersih-bersih kos (per jam)', 'mulai Rp20.000'],
-        ['Bantuan administrasi', 'mulai Rp10.000'],
-        ['Permintaan custom', 'nego di chat']
-      ]" :key="i">
-        <div class="flex justify-between text-[var(--ink-soft)]">
-          <span x-text="row[0]"></span>
-          <span class="text-[var(--ink)]" x-text="row[1]"></span>
-        </div>
-      </template>
+  <div class="mt-10 grid md:grid-cols-2 gap-8">
+    <!-- Alur Kerja -->
+    <div>
+      <h3 class="font-display font-semibold text-lg flex items-center gap-2">📋 Alur Kerja</h3>
+      <div class="mt-4 space-y-4">
+        <template x-for="(step, i) in [
+          {num:'01', title:'Isi Form', desc:'Customer isi nama, layanan, detail, dan lokasi tujuan.'},
+          {num:'02', title:'Kirim via WA', desc:'Klik tombol kirim, pesanan otomatis masuk ke WhatsApp kami.'},
+          {num:'03', title:'Konfirmasi', desc:'Kami balas ≤20 menit dengan estimasi harga & waktu pengerjaan.'},
+          {num:'04', title:'Assign Mahasiswa', desc:'Order diberikan ke mahasiswa yang tersedia di shift tersebut.'},
+          {num:'05', title:'Pengerjaan', desc:'Mahasiswa jalan, update status via WA (dijemput, dikerjakan, selesai).'},
+          {num:'06', title:'Selesai & Bayar', desc:'Pekerjaan selesai, bayar tunai/transfer. Follow-up kepuasan customer.'}
+        ]" :key="i">
+          <div class="flex gap-4 items-start">
+            <span class="font-mono text-[var(--coral)] text-sm font-bold w-8 shrink-0" x-text="step.num"></span>
+            <div>
+              <p class="font-display font-semibold text-sm" x-text="step.title"></p>
+              <p class="text-sm text-[var(--ink-soft)]" x-text="step.desc"></p>
+            </div>
+          </div>
+        </template>
+      </div>
     </div>
-    <p class="dashed mt-4 pt-3 text-xs text-[var(--ink-soft)] text-center">*belum termasuk biaya barang yang dititip</p>
+
+    <!-- Manajemen Mahasiswa & Shift -->
+    <div>
+      <h3 class="font-display font-semibold text-lg flex items-center gap-2">👥 Manajemen Mahasiswa</h3>
+      <div class="mt-4 bg-[var(--paper-dim)] rounded-lg p-5 space-y-4">
+        <div>
+          <p class="font-display font-semibold text-sm">Shift Kerja</p>
+          <div class="mt-2 grid grid-cols-3 gap-2 text-sm">
+            <div class="bg-[var(--paper)] rounded p-2 text-center border border-[var(--ink)]/10">
+              <span class="font-mono text-xs">🌅</span>
+              <p class="font-semibold text-xs">Pagi</p>
+              <p class="text-xs text-[var(--ink-soft)]">07–12</p>
+            </div>
+            <div class="bg-[var(--paper)] rounded p-2 text-center border border-[var(--ink)]/10">
+              <span class="font-mono text-xs">☀️</span>
+              <p class="font-semibold text-xs">Siang</p>
+              <p class="text-xs text-[var(--ink-soft)]">12–17</p>
+            </div>
+            <div class="bg-[var(--paper)] rounded p-2 text-center border border-[var(--ink)]/10">
+              <span class="font-mono text-xs">🌙</span>
+              <p class="font-semibold text-xs">Malam</p>
+              <p class="text-xs text-[var(--ink-soft)]">17–22</p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="font-display font-semibold text-sm">Komisi</p>
+          <div class="mt-2 flex gap-4 text-sm">
+            <div class="bg-[var(--paper)] rounded p-3 flex-1 text-center border border-[var(--ink)]/10">
+              <span class="text-[var(--coral)] font-bold">20–30%</span>
+              <p class="text-xs text-[var(--ink-soft)]">Pengelola</p>
+            </div>
+            <div class="bg-[var(--paper)] rounded p-3 flex-1 text-center border border-[var(--ink)]/10">
+              <span class="text-[var(--green)] font-bold">70–80%</span>
+              <p class="text-xs text-[var(--ink-soft)]">Mahasiswa</p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="font-display font-semibold text-sm">Prioritas Order</p>
+          <div class="mt-2 space-y-1.5 text-sm">
+            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-500"></span> Dadakan (&lt;1 jam) — prioritas tinggi</div>
+            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-yellow-500"></span> Normal — prioritas sedang</div>
+            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500"></span> H-1 ke atas — prioritas rendah</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- ============ FORM PESAN (signature interaktif) ============ -->
+<!-- ============ FORM PESAN (with price calculator) ============ -->
 <section id="pesan" class="grid-paper py-16 sm:py-20">
   <div class="max-w-6xl mx-auto px-5 sm:px-8">
     <div class="max-w-xl mx-auto text-center">
@@ -252,39 +429,16 @@
       <p class="text-[var(--ink-soft)] mt-3">Isi form ini, struknya muncul otomatis di sebelah, lalu kirim langsung ke WhatsApp kami.</p>
     </div>
 
-    <div x-data="{
-      nama:'',
-      layanan:'Titip Beli',
-      lokasiTujuan:'',
-      detail:'',
-      waktu:'',
-      nomorWA:'6285199274599',
-      get pesan(){
-        return `Halo Unsur.Tulung, saya mau pesan:
-Nama: ${this.nama || '-'}
-Layanan: ${this.layanan}
-Lokasi jemput: (lihat share location yang saya kirim setelah ini)
-Lokasi tujuan: ${this.lokasiTujuan || '-'}
-Waktu dibutuhkan: ${this.waktu || 'secepatnya'}
-Detail: ${this.detail || '-'}`;
-      },
-      get waLink(){
-        return 'https://wa.me/' + this.nomorWA + '?text=' + encodeURIComponent(this.pesan);
-      },
-      get siapKirim(){
-        return this.nama.trim() !== '' && this.detail.trim() !== '';
-      }
-    }" class="grid lg:grid-cols-[1fr_0.85fr] gap-8 mt-10 items-start">
-
+    <div class="grid lg:grid-cols-[1fr_0.85fr] gap-8 mt-10 items-start">
       <!-- form -->
       <form @submit.prevent class="bg-[var(--paper-dim)] border border-[var(--ink)]/10 rounded-lg p-6 sm:p-7 space-y-5">
         <div>
-          <label class="block text-sm font-semibold mb-1.5">Nama kamu</label>
+          <label class="block text-sm font-semibold mb-1.5">Nama kamu <span class="text-[var(--coral)]">*</span></label>
           <input x-model="nama" type="text" placeholder="cth. Dimas" class="w-full rounded-md border border-[var(--ink)]/20 bg-[var(--paper)] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--coral)]">
         </div>
 
         <div>
-          <label class="block text-sm font-semibold mb-1.5">Jenis layanan</label>
+          <label class="block text-sm font-semibold mb-1.5">Jenis layanan <span class="text-[var(--coral)]">*</span></label>
           <select x-model="layanan" class="w-full rounded-md border border-[var(--ink)]/20 bg-[var(--paper)] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--coral)]">
             <option>Titip Beli</option>
             <option>Jemput & Antar Barang</option>
@@ -295,15 +449,18 @@ Detail: ${this.detail || '-'}`;
           </select>
         </div>
 
-        <div class="grid sm:grid-cols-2 gap-4">
-          <div class="rounded-md border border-dashed border-[var(--coral)]/50 bg-[var(--coral)]/5 px-3 py-2.5">
-            <p class="text-sm font-semibold flex items-center gap-1.5">📍 Lokasi jemput</p>
-            <p class="text-xs text-[var(--ink-soft)] mt-1">Tidak perlu diketik. Setelah chat WhatsApp terbuka, kirim lewat fitur <span class="font-semibold">Share Location</span> (ikon 📎 → Lokasi).</p>
+        <div>
+          <label class="block text-sm font-semibold mb-1.5">Perkiraan jarak (km) <span class="text-[var(--ink-soft)] text-xs font-normal">— mempengaruhi biaya</span></label>
+          <div class="flex items-center gap-3">
+            <input x-model.number="jarak" type="range" min="0.5" max="10" step="0.5" class="flex-1 accent-[var(--coral)]">
+            <span class="font-display font-bold text-lg min-w-[4rem] text-center" x-text="jarak + ' km'"></span>
           </div>
-          <div>
-            <label class="block text-sm font-semibold mb-1.5">Lokasi tujuan</label>
-            <input x-model="lokasiTujuan" type="text" placeholder="cth. Kos Melati No. 4" class="w-full rounded-md border border-[var(--ink)]/20 bg-[var(--paper)] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--coral)]">
-          </div>
+          <p class="text-xs text-[var(--ink-soft)] mt-1">*Jarak >1 km dikenakan tambahan Rp2.000/km</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold mb-1.5">Lokasi tujuan</label>
+          <input x-model="lokasiTujuan" type="text" placeholder="cth. Kos Melati No. 4" class="w-full rounded-md border border-[var(--ink)]/20 bg-[var(--paper)] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--coral)]">
         </div>
 
         <div>
@@ -312,8 +469,14 @@ Detail: ${this.detail || '-'}`;
         </div>
 
         <div>
-          <label class="block text-sm font-semibold mb-1.5">Detail pesanan</label>
+          <label class="block text-sm font-semibold mb-1.5">Detail pesanan <span class="text-[var(--coral)]">*</span></label>
           <textarea x-model="detail" rows="3" placeholder="Ceritakan apa yang perlu dibantu, sedetail mungkin" class="w-full rounded-md border border-[var(--ink)]/20 bg-[var(--paper)] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--coral)]"></textarea>
+        </div>
+
+        <!-- Total Price Display -->
+        <div class="bg-[var(--ink)] text-[var(--paper)] rounded-md p-4 flex justify-between items-center">
+          <span class="font-display font-semibold text-sm">Estimasi Total</span>
+          <span class="font-display font-bold text-xl" x-text="formattedPrice"></span>
         </div>
 
         <a :href="siapKirim ? waLink : '#'"
@@ -324,6 +487,8 @@ Detail: ${this.detail || '-'}`;
           Kirim Pesanan via WhatsApp
         </a>
         <p x-show="!siapKirim" x-cloak class="text-xs text-[var(--ink-soft)] text-center">Isi minimal nama dan detail pesanan dulu, ya.</p>
+        
+        <p class="text-xs text-[var(--ink-soft)] text-center">📍 Jangan lupa share <strong>lokasi jemput</strong> via WhatsApp setelah chat terbuka.</p>
       </form>
 
       <!-- live receipt -->
@@ -334,21 +499,22 @@ Detail: ${this.detail || '-'}`;
           <div class="dashed pt-3 space-y-1.5 text-[var(--ink-soft)]">
             <div class="flex justify-between gap-3"><span>Nama</span><span class="text-[var(--ink)] text-right" x-text="nama || '—'"></span></div>
             <div class="flex justify-between gap-3"><span>Layanan</span><span class="text-[var(--ink)] text-right" x-text="layanan"></span></div>
+            <div class="flex justify-between gap-3"><span>Jarak</span><span class="text-[var(--ink)] text-right" x-text="jarak + ' km'"></span></div>
             <div class="flex justify-between gap-3"><span>Tujuan</span><span class="text-[var(--ink)] text-right" x-text="lokasiTujuan || '—'"></span></div>
             <div class="flex justify-between gap-3"><span>Waktu</span><span class="text-[var(--ink)] text-right" x-text="waktu || 'secepatnya'"></span></div>
           </div>
-          <div class="dashed mt-3 pt-3 text-xs text-[var(--coral)] font-semibold text-center">
-            📍 Jangan lupa share location jemput via WhatsApp
+          <div class="dashed mt-3 pt-3 flex justify-between font-display font-bold text-[var(--coral)]">
+            <span>ESTIMASI TOTAL</span>
+            <span x-text="formattedPrice"></span>
           </div>
           <div class="dashed mt-3 pt-3">
             <p class="text-[var(--ink-soft)] mb-1">Detail:</p>
-            <p class="text-[var(--ink)]" x-text="detail || 'belum diisi...'"></p>
+            <p class="text-[var(--ink)] text-sm" x-text="detail || 'belum diisi...'"></p>
           </div>
-          <p class="text-center text-xs text-[var(--ink-soft)] mt-3">Status: <span class="font-semibold" x-text="siapKirim ? 'siap dikirim ✓' : 'menunggu data...'"></span></p>
+          <p class="text-center text-xs text-[var(--ink-soft)] mt-3">Status: <span class="font-semibold" x-text="siapKirim ? '✅ siap dikirim' : '⏳ menunggu data...'"></span></p>
         </div>
         <div class="receipt-zigzag rounded-b-sm -mt-px"></div>
       </div>
-
     </div>
   </div>
 </section>
@@ -386,7 +552,9 @@ Detail: ${this.detail || '-'}`;
         {q:'Bagaimana cara bayarnya?', a:'Bisa tunai saat pekerjaan selesai atau transfer bank/e-wallet. Nominal disepakati dulu sebelum kami mulai kerjakan.'},
         {q:'Kalau barang yang dititip rusak atau hilang, gimana?', a:'Kami akan ganti sesuai kesepakatan. Untuk barang bernilai besar, sebaiknya diinfokan dulu supaya bisa diatur penanganannya.'},
         {q:'Bisa pesan untuk hari yang sama?', a:'Bisa, selama masih dalam jam operasional dan ada yang available. Semakin cepat pesan, semakin besar kemungkinan langsung dikerjakan.'},
-        {q:'Apakah harus jadi mahasiswa untuk pakai jasa ini?', a:'Tidak. Siapa saja di sekitar area layanan boleh pesan — yang mahasiswa itu yang mengerjakan, bukan yang harus memesan.'}
+        {q:'Apakah harus jadi mahasiswa untuk pakai jasa ini?', a:'Tidak. Siapa saja di sekitar area layanan boleh pesan — yang mahasiswa itu yang mengerjakan, bukan yang harus memesan.'},
+        {q:'Bagaimana sistem komisi untuk mahasiswa?', a:'Pengelola ambil 20-30%, sisanya 70-80% untuk mahasiswa yang mengerjakan. Pembagian dilakukan setiap minggu.'},
+        {q:'Apa yang dimaksud order dadakan?', a:'Order yang perlu dikerjakan kurang dari 1 jam sejak dipesan. Ada biaya tambahan Rp5.000 untuk prioritas.'}
       ]" :key="i">
         <button @click="open = (open === i ? null : i)" class="w-full flex items-center justify-between gap-4 py-4 text-left font-display font-semibold">
           <span x-text="faq.q"></span>
@@ -407,13 +575,14 @@ Detail: ${this.detail || '-'}`;
         Unsur.Tulung
       </p>
       <p class="text-sm text-[var(--paper)]/60 mt-3">Jasa serabutan dari mahasiswa, untuk siapa saja di sekitar kampus.</p>
+      <p class="text-xs text-[var(--paper)]/40 mt-4">© 2026 Unsur.Tulung. Dikerjakan dengan niat dan kopi sachet.</p>
     </div>
     <div>
       <p class="font-display font-semibold text-sm uppercase tracking-wider text-[var(--paper)]/50">Kontak</p>
       <ul class="mt-3 space-y-2 text-sm text-[var(--paper)]/80">
         <li>WhatsApp: 0851-9927-4599</li>
-        <li>Email: </li>
-        <li>Tiktok: <a href="https://www.tiktok.com/@unsur.tulung">unsur.tulung</a></li>
+        <li>Email: unsur.tulung@gmail.com</li>
+        <li>Tiktok: @unsur.tulung</li>
         <li>Jam: 07.00–22.00 setiap hari</li>
       </ul>
     </div>
@@ -421,17 +590,21 @@ Detail: ${this.detail || '-'}`;
       <p class="font-display font-semibold text-sm uppercase tracking-wider text-[var(--paper)]/50">Navigasi</p>
       <ul class="mt-3 space-y-2 text-sm text-[var(--paper)]/80">
         <li><a href="#layanan" class="hover:text-[var(--yellow)]">Layanan</a></li>
-        <li><a href="#cara-kerja" class="hover:text-[var(--yellow)]">Cara Kerja</a></li>
-        <li><a href="#harga" class="hover:text-[var(--yellow)]">Estimasi Harga</a></li>
+        <li><a href="#harga" class="hover:text-[var(--yellow)]">Harga</a></li>
+        <li><a href="#sistem" class="hover:text-[var(--yellow)]">Sistem</a></li>
         <li><a href="#pesan" class="hover:text-[var(--yellow)]">Pesan</a></li>
       </ul>
     </div>
     <div>
       <p class="font-display font-semibold text-sm uppercase tracking-wider text-[var(--paper)]/50">Area Layanan</p>
       <p class="text-sm text-[var(--paper)]/80 mt-3">Sekitar kampus & kos terdekat. Area lain bisa dikonfirmasi via chat.</p>
+      <div class="mt-3 flex gap-2">
+        <span class="text-xs bg-[var(--paper)]/10 px-2 py-1 rounded">Kampus A</span>
+        <span class="text-xs bg-[var(--paper)]/10 px-2 py-1 rounded">Kampus B</span>
+        <span class="text-xs bg-[var(--paper)]/10 px-2 py-1 rounded">Kos daerah</span>
+      </div>
     </div>
   </div>
-  <p class="text-center text-xs text-[var(--paper)]/40 mt-10">© 2026 Unsur.Tulung. Dikerjakan dengan niat dan kopi sachet.</p>
 </footer>
 
 </body>
